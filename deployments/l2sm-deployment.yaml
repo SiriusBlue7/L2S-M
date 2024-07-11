@@ -1,4 +1,3 @@
-
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
@@ -195,7 +194,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /onos/ui
-            port: 8181   
+            port: 8181
           initialDelaySeconds: 30
           periodSeconds: 10
         ports:
@@ -297,6 +296,19 @@ spec:
   selector:
     l2sm-component: l2sm-opt
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-service
+spec:
+  type: ClusterIP
+  selector:
+    l2sm-component: l2sm-opt
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -335,7 +347,7 @@ spec:
           sleep 5;
       containers:
       - name: l2sm-switch
-        image: alexdecb/l2sm-switch:2.2
+        image: alejandroher/l2sm-switch:v1.7
         #args: ["setup_switch.sh && sleep infinity"]
         env:
         - name: NODENAME
@@ -351,5 +363,57 @@ spec:
             add: ["NET_ADMIN"]
       nodeSelector:
         kubernetes.io/arch: amd64
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: l2sm-overlay-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      l2sm-component: l2sm-overlay
+  template:
+    metadata:
+      labels:
+        l2sm-component: l2sm-overlay
+    spec:
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:latest
+          ports:
+            - containerPort: 5672
+              name: rabbitmq
 
+        - image: alejandroher/l2sm-overlay-manager:v1.15
+          name: l2sm-overlay-manager
+          ports:
+          - containerPort: 8080
+            name: mysql
 
+          securityContext:
+          # Add the required security context properties here
+            capabilities:
+              add: ["NET_ADMIN"]
+      nodeSelector:
+        dedicated: control-plane
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: overlay-manager-service
+  labels:
+    app: overlay
+spec:
+  type: ClusterIP
+  selector:
+    l2sm-component: l2sm-overlay
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: rabbitmq
+      protocol: TCP #Esto seria para el rabbitMQ
+      port: 5672
+      targetPort: 5672
