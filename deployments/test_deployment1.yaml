@@ -347,7 +347,7 @@ spec:
           sleep 5;
       containers:
       - name: l2sm-switch
-        image: alejandroher/l2sm-switch:v1
+        image: alejandroher/l2sm-switch:v1.7
         #args: ["setup_switch.sh && sleep infinity"]
         env:
         - name: NODENAME
@@ -355,7 +355,7 @@ spec:
             fieldRef:
               fieldPath: spec.nodeName
         - name: NVETHS
-          value: "10"
+          value: "10"  
         - name: CONTROLLERIP
           value: "l2sm-controller-service"
         securityContext:
@@ -363,73 +363,3 @@ spec:
             add: ["NET_ADMIN"]
       nodeSelector:
         kubernetes.io/arch: amd64
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: l2sm-overlay-manager
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      l2sm-component: l2sm-overlay
-  template:
-    metadata:
-      labels:
-        l2sm-component: l2sm-overlay
-    spec:
-      containers:
-        - name: rabbitmq
-          image: rabbitmq:latest
-          ports:
-            - containerPort: 5672
-              name: rabbitmq
-
-        - image: alejandroher/l2sm-overlay-manager:v1.20
-          name: l2sm-overlay-manager
-          ports:
-          - containerPort: 8080
-            name: mysql
-
-          securityContext:
-          # Add the required security context properties here
-            capabilities:
-              add: ["NET_ADMIN"]
-      nodeSelector:
-        dedicated: control-plane
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: overlay-manager-service
-  labels:
-    app: overlay
-spec:
-  type: ClusterIP
-  selector:
-    l2sm-component: l2sm-overlay
-  ports:
-    - name: http
-      protocol: TCP
-      port: 8080
-      targetPort: 8080
-    - name: rabbitmq
-      protocol: TCP #Esto seria para el rabbitMQ
-      port: 5672
-      targetPort: 5672
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: overlay-manager-nodeport
-  labels:
-    app: overlay
-spec:
-  type: NodePort
-  selector:
-    l2sm-component: l2sm-overlay
-  ports:
-    - name: http-port
-      port: 8080
-      targetPort: 8080
-      nodePort: 30010 # Choose a port number that is available in your cluster

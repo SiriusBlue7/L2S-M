@@ -9,14 +9,11 @@ def main():
     connection = pika.BlockingConnection(pika.ConnectionParameters('overkay-manager-service'))
     channel = connection.channel()
 
-    channel.exchange_declare(exchange='logs', exchange_type='fanout')
+    # Declare the queue to consume messages from
+    channel.queue_declare(queue='connections')
 
-    result = channel.queue_declare(queue='', exclusive=True)
-    queue_name = result.method.queue
-
-    channel.queue_bind(exchange='logs', queue=queue_name)
-
-    print(' [*] Waiting for logs. To exit press CTRL+C')
+    # Create a list to store the collected messages
+    collected_messages = callback()
 
     # Define the callback function to handle incoming messages
     def callback(body):
@@ -25,14 +22,18 @@ def main():
 
         execute_kubectl_command(json.dumps(message))
     # Start consuming messages from the queue
-    channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True) #As the queue was defined as 'connections' we have to consume from that queue.
+    channel.basic_consume(queue='connections', on_message_callback=callback, auto_ack=True) #As the queue was defined as 'connections' we have to consume from that queue.
     # Keep consuming messages until the user interrupts the program
-    
-    channel.start_consuming()
+    try:
+        channel.start_consuming()
+    except KeyboardInterrupt:
+        pass
 
     # Close the connection to RabbitMQ
     connection.close()
     
+    # Convert the collected_messages list to JSON and return it
+    return json.dumps(collected_messages)
 
  #what does json.dumps(collected_messages) do?. This string can be used to store the list of messages in a file or send it over the network.
  #converts the collected_messages list to a JSON-formatted string
@@ -58,7 +59,6 @@ def execute_kubectl_command(data):
     # Empty the file
     with open(file_path, 'w') as file:
         file.write('') #We empty the file after executing the kubectl command to avoid errors in the next execution
-    
 
 if __name__ == '__main__':
     try:
@@ -69,3 +69,4 @@ if __name__ == '__main__':
             sys.exit(0)
         except SystemExit:
             os._exit(0)
+

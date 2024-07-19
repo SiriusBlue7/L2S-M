@@ -1,0 +1,16 @@
+çkind: ConfigMap
+apiVersion: v1
+metadata:
+  name: general-configmap
+data:
+  #next
+  tfg-ahermosilla-1: |
+    add:tfg-ahermosilla-2
+  #next
+  tfg-ahermosilla-2: |
+    add:tfg-ahermosilla-1
+#end
+  # Or set as complete file contents (even JSON!)
+  #keys: | 
+  #  image.public.key=771 
+  #  rsa.public.key=42

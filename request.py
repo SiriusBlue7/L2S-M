@@ -4,7 +4,7 @@ import requests
 def perform_get_request(ip, port):
     # Perform GET request logic here
     print("GET request")
-    url = f"http://{ip}:{port}/overlay"
+    url = f"http://{ip}:{port}/connections"
     print(f"URL: {url}")
     response = requests.get(url)
     print(response.text)
