@@ -1,12 +1,11 @@
 import pika
-import json
 import os
 import sys
 
 def main():
     os.system("./setup_switch.sh" ) #lanzamos este comando para ejecutar el script de configuracion del switch
     # Establish a connection to RabbitMQ
-    connection = pika.BlockingConnection(pika.ConnectionParameters('overkay-manager-service'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters('l2sm-overlay-manager-service'))
     channel = connection.channel()
 
     channel.exchange_declare(exchange='logs', exchange_type='fanout')
@@ -50,7 +49,7 @@ def execute_kubectl_command(data):
 
     # Write the data to the file
     with open(file_path, 'w') as file:
-        file.write(json.dumps(data)) #We write the data to the file in JSON format
+        file.write(data) #We write the data to the file in JSON format
 
     # Execute the kubectl command
     os.system(f'l2sm-vxlans --node_name=$NODENAME {file_path}')

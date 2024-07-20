@@ -299,7 +299,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: database-service
+  name: l2sm-database-service
 spec:
   type: ClusterIP
   selector:
@@ -347,7 +347,7 @@ spec:
           sleep 5;
       containers:
       - name: l2sm-switch
-        image: alejandroher/l2sm-switch:v1
+        image: alejandroher/l2sm-switch:v1.10
         #args: ["setup_switch.sh && sleep infinity"]
         env:
         - name: NODENAME
@@ -385,7 +385,7 @@ spec:
             - containerPort: 5672
               name: rabbitmq
 
-        - image: alejandroher/l2sm-overlay-manager:v1.20
+        - image: alejandroher/l2sm-overlay-manager:v1.21
           name: l2sm-overlay-manager
           ports:
           - containerPort: 8080
@@ -401,7 +401,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: overlay-manager-service
+  name: l2sm-overlay-manager-service
   labels:
     app: overlay
 spec:
@@ -421,7 +421,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: overlay-manager-nodeport
+  name: l2sm-overlay-manager-nodeport
   labels:
     app: overlay
 spec:

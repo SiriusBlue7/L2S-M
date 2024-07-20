@@ -4,7 +4,7 @@ import pika
 import yaml
 import json
 app = Flask(__name__)
-databaseIP = "database-service" #This is the IP of the database service. We have to change it to the correct IP of the database service.
+databaseIP = "l2sm-database-service" #This is the IP of the database service. We have to change it to the correct IP of the database service.
 
 def get_nodeIP(node):
     """
@@ -213,7 +213,7 @@ def send_message(message):
   """
   # Informacion sobre rabbitmq obtenida de https://www.rabbitmq.com/tutorials/tutorial-one-python
   #We establish a connection to the RabbitMQ server using pika library
-  connection = pika.BlockingConnection(pika.ConnectionParameters('overlay-manager-service'))
+  connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
   channel = connection.channel()
   
   #We declare the exchange where the message is going to be sent.
