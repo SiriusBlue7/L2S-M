@@ -3,8 +3,11 @@ import os
 import sys
 
 def main():
+    print('Ejecutamos el script')
+    os.system("chmod -v +x setup_switch.sh")
     os.system("./setup_switch.sh" ) #lanzamos este comando para ejecutar el script de configuracion del switch
     # Establish a connection to RabbitMQ
+    print('We have established a connetion with RabbitMQ')
     connection = pika.BlockingConnection(pika.ConnectionParameters('l2sm-overlay-manager-service'))
     channel = connection.channel()
 
@@ -18,11 +21,11 @@ def main():
     print(' [*] Waiting for logs. To exit press CTRL+C')
 
     # Define the callback function to handle incoming messages
-    def callback(body):
+    def callback(ch, method, properties, body):
         # Decode the message body from bytes to string
         message = body.decode('utf-8')
 
-        execute_kubectl_command(json.dumps(message))
+        execute_kubectl_command(message)
     # Start consuming messages from the queue
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True) #As the queue was defined as 'connections' we have to consume from that queue.
     # Keep consuming messages until the user interrupts the program
@@ -46,18 +49,13 @@ def execute_kubectl_command(data):
     """
     # Create a file path
     file_path = '/etc/l2sm/switchConfig.json' #We create the file in the /etc/l2sm directory with the name switchConfig.json
-
+    os.system("./clear_vxlans.sh" )
     # Write the data to the file
     with open(file_path, 'w') as file:
-        file.write(data) #We write the data to the file in JSON format
+        file.write(data[1:-1].replace('\\','')) #We write the data to the file in JSON format
 
     # Execute the kubectl command
-    os.system(f'l2sm-vxlans --node_name=$NODENAME {file_path}')
-    
-    # Empty the file
-    with open(file_path, 'w') as file:
-        file.write('') #We empty the file after executing the kubectl command to avoid errors in the next execution
-    
+    os.system('l2sm-vxlans --node_name=$NODENAME /etc/l2sm/switchConfig.json')
 
 if __name__ == '__main__':
     try:

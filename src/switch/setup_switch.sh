@@ -9,4 +9,4 @@ ovs-vswitchd --pidfile=/var/run/openvswitch/ovs-vswitchd.pid --detach
 l2sm-init --n_veths=$NVETHS --controller_ip=$CONTROLLERIP 
 
 #l2sm-vxlans --node_name=$NODENAME /etc/l2sm/switchConfig.json
-sleep infinity
+

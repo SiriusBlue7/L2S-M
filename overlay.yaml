@@ -5,10 +5,10 @@ metadata:
 data:
   #next
   tfg-ahermosilla-1: |
-    add:tfg-ahermosilla-2
+    del:tfg-ahermosilla-2
   #next
   tfg-ahermosilla-2: |
-    add:tfg-ahermosilla-1
+    del:tfg-ahermosilla-1
 #end
   # Or set as complete file contents (even JSON!)
   #keys: | 

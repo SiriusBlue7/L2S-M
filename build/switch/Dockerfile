@@ -29,8 +29,11 @@ RUN apt-get update && \
 
 COPY ./src/switch/setup_switch.sh ./
 
+COPY ./src/switch/clear_vxlans.sh ./
+
 RUN chmod +x ./setup_switch.sh && \
     mkdir /etc/l2sm/
+RUN chmod +x ./clear_vxlans.sh
 
 # Copy Python binaries and libraries from the Python stage
 COPY --from=python /usr/local/lib /usr/local/lib

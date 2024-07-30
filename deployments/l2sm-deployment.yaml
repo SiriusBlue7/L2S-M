@@ -347,7 +347,7 @@ spec:
           sleep 5;
       containers:
       - name: l2sm-switch
-        image: alejandroher/l2sm-switch:v1.10
+        image: alejandroher/l2sm-switch:v1.24
         #args: ["setup_switch.sh && sleep infinity"]
         env:
         - name: NODENAME
